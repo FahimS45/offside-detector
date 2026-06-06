@@ -109,10 +109,8 @@ Open http://localhost:7860 in your browser. No API keys, no `.env` file needed.
 ### Run the terminal test client (no frontend needed)
 
 ```bash
-python test_ws.py --video assets/sample_input/offside01-720.mp4 --direction right
+python backend/test/test_ws.py --video assets/sample_input/offside01-720.mp4 --direction right
 
-# Skip the prompt and save output video directly
-python test_ws.py --video assets/sample_input/offside01-720.mp4 --direction right  --save result.mp4
 ```
 
 ---
@@ -177,33 +175,39 @@ offside-detector/
 │   ├── api/
 │   │   └── routes.py            HTTP upload + WebSocket pipeline endpoints
 │   ├── services/
-│   │   ├── detector.py          YOLOv8m + ByteTrack + colour-based role assignment
-│   │   ├── team_classifier.py   KMeans jersey colour clustering
+│   │   ├── detector.py          YOLOv8s + ByteTrack + colour-based role assignment
+│   │   ├── team_classifier.py   KMeans jersey colour clustering (CIE Lab)
 │   │   ├── offside_logic.py     Geometric offside rule engine
 │   │   ├── annotator.py         OpenCV frame annotation and rendering
 │   │   └── video_processor.py   Session lifecycle, scan → classify → process pipeline
+│   ├── test/
+│   │   └── test_ws.py           Terminal WebSocket test client
 │   └── utils/
 │       ├── colours.py           CIE Lab helpers, role→BGR colour map
 │       ├── geometry.py          Bounding box helpers
 │       └── video.py             FFmpeg re-encode, VideoWriter wrapper
-├── frontend/                    
-│   └── dist/                    Built output — served by FastAPI as static files
+├── frontend/
 │   ├── src/
-│   │   ├── api/                 Axios/Fetch HTTP or WebSocket client logic
-│   │   ├── components/          Reusable UI elements (buttons, video players, etc.)
-│   │   ├── pages/               Main view components (e.g., Dashboard, Analysis)
+│   │   ├── api/
+│   │   │   └── client.ts        HTTP + WebSocket client (upload, WS pipeline, video URL)
+│   │   ├── components/
+│   │   │   ├── UploadBox.tsx    File drop zone and direction selector
+│   │   │   ├── ProcessingState.tsx  Progress bar and jersey colour picker
+│   │   │   ├── VerdictCard.tsx  Final verdict display
+│   │   │   └── VideoPlayer.tsx  Annotated output video player
+│   │   ├── pages/
+│   │   │   └── Home.tsx         Main page — orchestrates the full pipeline flow
 │   │   ├── App.tsx              Root component
-│   │   ├── index.css            Global styles
+│   │   ├── index.css            Global dark theme styles
 │   │   └── main.tsx             App entry point
 │   ├── index.html               HTML template entry point
 │   ├── package-lock.json        NPM lockfile
 │   ├── package.json             NPM dependencies and scripts
 │   ├── tsconfig.json            TypeScript configuration
-│   └── vite.config.ts           Vite configuration
+│   └── vite.config.ts           Vite + dev proxy configuration
 ├── assets/
 │   └── sample_input/            Sample football clips for testing
-├── test_ws.py                   Terminal WebSocket test client
-├── Dockerfile                   Production image
+├── Dockerfile                   Multistage build — Node (frontend) + PyTorch (backend)
 ├── requirements.txt             Python dependencies
 └── .gitignore
 ```
@@ -228,4 +232,4 @@ offside-detector/
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT
